@@ -2,28 +2,13 @@
 // use std::process;
 use dotenv;
 use std::cmp::Ordering;
+use reqwest::Client;
 
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
-fn main() -> std::io::Result<()> {
-    // let env_variables = read_file("src/.env")?;
-    // assert_eq!(&env_variables["KEY"], "YOUR_CLIENT_ID");
+fn get_api_key_from_env() -> String {
 
-
-    // let key = "PATH";
-    // match env::var_os(key) {
-    //     Some(paths) => {
-    //         for path in env::split_paths(&paths) {
-    //             println!("'{}'", path.display());
-    //         }
-    //     }
-    //     None => println!("{key} is not defined in the environment.")
-    // }
-
-    // dotenv().ok();
-
-    // let mut api_key = "hoge".to_string();
     let mut api_key:String = "hoge".to_string();
-    // println!("{}: {}", api_key, type_of(&api_key));
 
     fn type_of<T>(_: T) -> String{
         let a = std::any::type_name::<T>();
@@ -37,10 +22,25 @@ fn main() -> std::io::Result<()> {
         if comparison ==  Ordering::Equal {
             api_key = item.1.to_string();
         }
-        // println!("{}: {}", item.0, type_of(&item.0));
 
     }
-    // println!("key: {}", type_of(&"KEY".to_string()));
+
     println!("key: {}", api_key);
+    return api_key.to_string();
+}
+
+
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let client = Client::new(); // 1
+    let url = "https://webservice.recruit.co.jp/hotpepper/gourmet/v1/?";
+    let response = client
+        .get(url)
+        .query(&[("large_area", "Z011"), ("key",&get_api_key_from_env())])
+        .send()
+        .await?; // 2
+    let body = response.text().await?; // 3
+    println!("{}", body);
     Ok(())
 }
