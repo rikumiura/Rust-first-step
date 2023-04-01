@@ -22,46 +22,48 @@ fn get_token_from_env() -> (String,String,String,String) {
 
     let mut client_id:String = "hoge".to_string();
     let mut project_id:String = "hoge".to_string();
-    let mut auth_uri:String = "hoge".to_string();
-    let mut token_uri:String = "hoge".to_string();
+    let mut auth_url:String = "hoge".to_string();
+    let mut token_url:String = "hoge".to_string();
 
-    fn type_of<T>(_: T) -> String{
-        let a = std::any::type_name::<T>();
-        return a.to_string();
-    }
 
     dotenv::from_filename("api.env").ok();
     let result: Vec<(String, String)> = dotenv::vars().collect();
     for item in result{
         let client_comparison = item.0.cmp(&"client_id".to_string());
         let project_comparison = item.0.cmp(&"project_id".to_string());
-        let auth_comparison = item.0.cmp(&"auth_uri".to_string());
-        let token_comparison = item.0.cmp(&"token_uri".to_string());
+        let auth_comparison = item.0.cmp(&"auth_url".to_string());
+        let token_comparison = item.0.cmp(&"token_url".to_string());
         if client_comparison ==  Ordering::Equal {
             client_id = item.1.to_string();
         }else if project_comparison == Ordering::Equal{
             project_id = item.1.to_string();
         }else if auth_comparison == Ordering::Equal{
-            auth_uri = item.1.to_string();
+            auth_url = item.1.to_string();
         }else if token_comparison == Ordering::Equal{
-            token_uri = item.1.to_string();
+            token_url = item.1.to_string();
         }
     }
-    return (client_id.to_string(), client_id.to_string(), client_id.to_string(), client_id.to_string());
+    return (client_id.to_string(), project_id.to_string(), auth_url.to_string(), token_url.to_string());
 }
 
 fn main(){
+    let token = get_token_from_env();
+    // println!("{}: {}: {}: {}", token.0, token.1, token.2, token.3);
+    let client_id = token.0;
+    let client_secret = token.1;
+    let url_oauth = token.2;
+    let token_url = token.3;
     // Create an OAuth2 client by specifying the client ID, client secret, authorization URL and
     // token URL.
     let client =
         BasicClient::new(
-            ClientId::new("client_id".to_string()),
-            Some(ClientSecret::new("client_secret".to_string())),
-            AuthUrl::new("http://authorize".to_string())?,
-            Some(TokenUrl::new("http://token".to_string())?)
+            ClientId::new(client_id.to_string()),
+            Some(ClientSecret::new(client_secret.to_string())),
+            AuthUrl::new(url_oauth.to_string())?,
+            Some(TokenUrl::new(token_url.to_string())?)
         )
         // Set the URL the user will be redirected to after the authorization process.
-        .set_redirect_uri(RedirectUrl::new("http://redirect".to_string())?);
+        .set_redirect_uri(RedirectUrl::new("http://localhost:8080/auth/google/callback".to_string())?);
 
     // Generate a PKCE challenge.
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
