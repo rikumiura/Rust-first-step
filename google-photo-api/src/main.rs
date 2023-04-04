@@ -24,6 +24,7 @@ fn get_token_from_env() -> (String,String,String,String) {
     let mut project_id:String = "hoge".to_string();
     let mut auth_url:String = "hoge".to_string();
     let mut token_url:String = "hoge".to_string();
+    let mut client_secret:String = "hoge".to_string();
 
 
     dotenv::from_filename("api.env").ok();
@@ -33,6 +34,7 @@ fn get_token_from_env() -> (String,String,String,String) {
         let project_comparison = item.0.cmp(&"project_id".to_string());
         let auth_comparison = item.0.cmp(&"auth_url".to_string());
         let token_comparison = item.0.cmp(&"token_url".to_string());
+        let cs_comparison = item.0.cmp(&"token_url".to_string());
         if client_comparison ==  Ordering::Equal {
             client_id = item.1.to_string();
         }else if project_comparison == Ordering::Equal{
@@ -41,9 +43,11 @@ fn get_token_from_env() -> (String,String,String,String) {
             auth_url = item.1.to_string();
         }else if token_comparison == Ordering::Equal{
             token_url = item.1.to_string();
+        }else if client_secret == Ordering::Equal{
+            cs_comparison = item.i.to_string();
         }
     }
-    return (client_id.to_string(), project_id.to_string(), auth_url.to_string(), token_url.to_string());
+    return (client_id.to_string(), project_id.to_string(), auth_url.to_string(), token_url.to_string(), cs_comparison.to_string());
 }
 
 fn main(){
@@ -53,6 +57,7 @@ fn main(){
     let client_secret = token.1;
     let url_oauth = token.2;
     let token_url = token.3;
+    // let client_secret = token.4;
     // Create an OAuth2 client by specifying the client ID, client secret, authorization URL and
     // token URL.
     let client =
